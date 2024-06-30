@@ -1,0 +1,23 @@
+﻿<Window x:Class="AloneSkylandLauncher.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:AloneSkylandLauncher"
+        mc:Ignorable="d"
+        Title="AloneSkyland Launcher" Height="450" Width="800">
+    <Grid>
+        <WebBrowser Margin="0,0,0,166"/>
+        <ProgressBar Name="loadBar" Margin="10,273,10,131"/>
+        <Label Margin="10,273,10,131" HorizontalAlignment="Center" Name="loadLabel">Информация о загрузке</Label>
+        <GroupBox Header="Играть" Margin="0,308,0,0">
+            <Canvas>
+                <Label HorizontalAlignment="Left" Canvas.Left="10" VerticalAlignment="Top" Canvas.Top="2">Версия игры</Label>
+                <ComboBox Name="versionBox" HorizontalAlignment="Left" Width="120" Height="30" Canvas.Left="10" Canvas.Top="28" SelectionChanged="versionBox_SelectionChanged_1"/>
+                <Button Name="downloadButton" Height="28" Width="180" Canvas.Left="598" Canvas.Top="10" HorizontalAlignment="Center" VerticalAlignment="Top" Click="downloadButton_Click">Загрузить</Button>
+                <Button Name="PlayButton" Height="48" Width="180" Canvas.Left="598" Canvas.Top="43" HorizontalAlignment="Center" VerticalAlignment="Top" IsEnabled="False" Click="PlayButton_Click">Играть</Button>
+            </Canvas>
+        </GroupBox>
+
+    </Grid>
+</Window>

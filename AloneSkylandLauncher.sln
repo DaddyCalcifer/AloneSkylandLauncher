@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.35013.160
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AloneSkylandLauncher", "AloneSkylandLauncher\AloneSkylandLauncher.csproj", "{E129132E-80FF-45C2-AC6B-F8078C8A224D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E129132E-80FF-45C2-AC6B-F8078C8A224D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E129132E-80FF-45C2-AC6B-F8078C8A224D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E129132E-80FF-45C2-AC6B-F8078C8A224D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E129132E-80FF-45C2-AC6B-F8078C8A224D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {488161D6-5A54-4F55-B271-4B0F7CC5E5A2}
+	EndGlobalSection
+EndGlobal
