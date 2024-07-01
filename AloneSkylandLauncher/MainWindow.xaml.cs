@@ -1,7 +1,10 @@
 ﻿using AloneSkylandLauncher.Controller;
+using HtmlAgilityPack;
+using Markdig.Wpf;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -22,55 +25,113 @@ namespace AloneSkylandLauncher
     public partial class MainWindow : Window
     {
         VersionController versionController;
+        LauncherUpdateController launcherUpdateController;
+        private readonly HttpClient _httpClient = new HttpClient();
+        bool currentVersionInstalled = false;
+        Dictionary<string, string> releases;
         public MainWindow()
         {
             InitializeComponent();
-            versionController = new VersionController();
-            versionController.LoadVersions(versionBox).ConfigureAwait(false);
+            this.Width = 700;
+            this.Height = 470;
+            releases = new Dictionary<string, string>();
+            versionController = new VersionController(this);
+            launcherUpdateController = new LauncherUpdateController();
+
+            //CheckForUpdates();
             loadLabel.Content = String.Empty;
+            LoadMarkdownFile();
+        }
+
+        private async void LoadMarkdownFile()
+        {
+            string markdownContent = await DownloadMarkdownFileAsync("https://raw.githubusercontent.com/DaddyCalcifer/AloneSkyland/main/README.md");
+            InfoPanel.Markdown = markdownContent;
+        }
+
+        private async Task<string> DownloadMarkdownFileAsync(string url)
+        {
+            try
+            {
+                return await _httpClient.GetStringAsync(url);
+            }
+            catch (HttpRequestException e)
+            {
+                MessageBox.Show($"Ошибка при загрузке файла: {e.Message}");
+                return string.Empty;
+            }
+        }
+
+        async void CheckForUpdates()
+        {
+            if (launcherUpdateController != null)
+            {
+                var last_ver = await launcherUpdateController.GetLatestLauncherVersionAsync();
+                if (last_ver != LauncherPrefs.Version)
+                {
+                    if(MessageBox.Show(
+                        "Найдена новая версия лаунчера.\nЗагрузить и установить обновление?",
+                        "Обновление лаунчера",
+                        MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                    await launcherUpdateController.UpdateLauncherAsync();
+                }
+            }
         }
 
         private async void downloadButton_Click(object sender, RoutedEventArgs e)
         {
             await downloadGame();
         }
-        async Task downloadGame(bool reinstall=false)
+        async Task downloadGame()
         {
             string selectedVersion = versionBox.SelectedItem as string;
-            if(reinstall)
+            if (currentVersionInstalled)
             {
-                if (MessageBox.Show("Вы уверены что хотите переустановить игру?", "Установка", MessageBoxButton.YesNo) != MessageBoxResult.Yes)
+                if (MessageBox.Show("Вы уверены что хотите удалить игру?" +
+                    "\nИгровые сохранения тоже будут удалены!",
+                    "Удаление",
+                    MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                    versionController.DeleteVersion(selectedVersion);
+            }
+            else
+            {
+                if (string.IsNullOrEmpty(selectedVersion))
+                {
+                    MessageBox.Show("Ошибка: Не выбрана версия",
+                        "Ошибка загрузки",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error);
                     return;
+                }
+                await versionController.DownloadAndLaunchGame(selectedVersion, loadBar, loadLabel);
             }
-            if (string.IsNullOrEmpty(selectedVersion))
-            {
-                MessageBox.Show("Ошибка: Не выбрана версия",
-                    "Ошибка загрузки",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error);
-                return;
-            }
-            await versionController.DownloadAndLaunchGame(selectedVersion, loadBar, loadLabel);
+            updatePlayPanel();
         }
-        private void versionBox_SelectionChanged_1(object sender, SelectionChangedEventArgs e)
+        public void updatePlayPanel()
         {
-            bool isVersionInstalled = false;
             string selectedVersion = versionBox.SelectedItem as string;
             if (!string.IsNullOrEmpty(selectedVersion))
             {
-                isVersionInstalled = versionController.isVersionInstalled(selectedVersion);
+                currentVersionInstalled = versionController.isVersionInstalled(selectedVersion);
             }
             else return;
-            if (isVersionInstalled)
+            if (currentVersionInstalled)
             {
                 PlayButton.IsEnabled = true;
-                downloadButton.Content = "Переустановить";
+                downloadButton.Content = "Удалить";
             }
             else
             {
                 PlayButton.IsEnabled = false;
                 downloadButton.Content = "Загрузить";
             }
+        }
+        private void versionBox_SelectionChanged_1(object sender, SelectionChangedEventArgs e)
+        {
+            var vers = versionBox.SelectedItem as string;
+            if (releases.ContainsKey(vers))
+                Console.WriteLine($"{releases[vers]}");
+            updatePlayPanel();
         }
 
         private void PlayButton_Click(object sender, RoutedEventArgs e)
@@ -84,6 +145,35 @@ namespace AloneSkylandLauncher
                     "Ошибка запуска",
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
+        }
+
+        private async void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            //await versionController.LoadVersions(versionBox);
+            await GetReleasesAsync();
+        }
+
+        public async Task GetReleasesAsync()
+        {
+            using (HttpClient client = new HttpClient())
+            {
+                var response = await client.GetStringAsync(GitHubReleasesController.GitHubReleasesUrl);
+                var htmlDocument = new HtmlDocument();
+                htmlDocument.LoadHtml(response);
+
+                var versionNodes = htmlDocument.DocumentNode.SelectNodes("//span[contains(@class, 'ml-1 wb-break-all')]");
+                var count = versionNodes.Count;
+                Console.WriteLine(count);
+                versionBox.Items.Clear();
+                for (var i = 0; i < count; i++)
+                {
+                    var version = versionNodes[i].InnerText.Trim();
+                    releases[version] = $"https://github.com/DaddyCalcifer/AloneSkyland/releases/download/{version}/game.zip";
+                    versionBox.Items.Add(versionNodes[i].InnerText.Trim());
+                }
+                if(versionBox.Items.Count > 0)
+                    versionBox.SelectedIndex = 0;
+            }
         }
     }
 }

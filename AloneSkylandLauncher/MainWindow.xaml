@@ -4,18 +4,28 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AloneSkylandLauncher"
+        xmlns:md="clr-namespace:Markdig.Wpf;assembly=Markdig.Wpf"
         mc:Ignorable="d"
-        Title="AloneSkyland Launcher" Height="450" Width="800">
+        Title="AloneSkyland Launcher v24.07.02" Height="450" Width="700" ResizeMode="CanMinimize" Loaded="Window_Loaded">
     <Grid>
-        <WebBrowser Margin="0,0,0,166"/>
-        <ProgressBar Name="loadBar" Margin="10,273,10,131"/>
-        <Label Margin="10,273,10,131" HorizontalAlignment="Center" Name="loadLabel">Информация о загрузке</Label>
-        <GroupBox Header="Играть" Margin="0,308,0,0">
+        <md:MarkdownViewer Margin="0,0,0,166" Name="InfoPanel"/>
+        <ProgressBar Name="loadBar" Margin="10,273,10,0" VerticalAlignment="Top" Height="28" RenderTransformOrigin="0.5,0.5">
+            <ProgressBar.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform ScaleY="-1"/>
+                    <SkewTransform/>
+                    <RotateTransform/>
+                    <TranslateTransform/>
+                </TransformGroup>
+            </ProgressBar.RenderTransform>
+        </ProgressBar>
+        <Label Margin="0,273,0,133" HorizontalAlignment="Center" Name="loadLabel">Информация о загрузке</Label>
+        <GroupBox Header="Играть" Margin="10,306,10,0" VerticalAlignment="Top" Height="128">
             <Canvas>
-                <Label HorizontalAlignment="Left" Canvas.Left="10" VerticalAlignment="Top" Canvas.Top="2">Версия игры</Label>
-                <ComboBox Name="versionBox" HorizontalAlignment="Left" Width="120" Height="30" Canvas.Left="10" Canvas.Top="28" SelectionChanged="versionBox_SelectionChanged_1"/>
-                <Button Name="downloadButton" Height="28" Width="180" Canvas.Left="598" Canvas.Top="10" HorizontalAlignment="Center" VerticalAlignment="Top" Click="downloadButton_Click">Загрузить</Button>
-                <Button Name="PlayButton" Height="48" Width="180" Canvas.Left="598" Canvas.Top="43" HorizontalAlignment="Center" VerticalAlignment="Top" IsEnabled="False" Click="PlayButton_Click">Играть</Button>
+                <Label HorizontalAlignment="Left" Canvas.Left="10" VerticalAlignment="Top" Canvas.Top="2">Версия игры:</Label>
+                <ComboBox Name="versionBox" HorizontalAlignment="Left" Width="143" Height="30" Canvas.Left="10" Canvas.Top="28" SelectionChanged="versionBox_SelectionChanged_1" VerticalAlignment="Center"/>
+                <Button Name="downloadButton" Height="28" Width="143" Canvas.Left="10" Canvas.Top="63" HorizontalAlignment="Left" VerticalAlignment="Center" Click="downloadButton_Click">Загрузить</Button>
+                <Button Name="PlayButton" Height="63" Width="180" Canvas.Left="456" Canvas.Top="27" HorizontalAlignment="Left" VerticalAlignment="Top" IsEnabled="False" Click="PlayButton_Click">Играть</Button>
             </Canvas>
         </GroupBox>
 
