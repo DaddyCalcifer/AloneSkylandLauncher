@@ -18,7 +18,7 @@ namespace AloneSkylandLauncher.Controller
 
         public VersionController(MainWindow mw)
         {
-            _releasesController = new GitHubReleasesController();
+            _releasesController = new GitHubReleasesController("https://github.com/DaddyCalcifer/AloneSkyland");
             _appDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ".AloneSkyland");
             Directory.CreateDirectory(_appDataPath);
             this.mw = mw;

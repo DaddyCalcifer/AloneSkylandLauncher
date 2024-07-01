@@ -1,5 +1,4 @@
-﻿using Octokit;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
@@ -12,9 +11,8 @@ namespace AloneSkylandLauncher.Controller
 {
     public class LauncherUpdateController
     {
-        public const string GitName = "DaddyCalcifer";
-        public const string GitRepos = "AloneSkylandLauncher";
-        private GitHubClient _githubClient = new GitHubClient(new ProductHeaderValue("AloneSkylandLauncher"));
+        public const string url = "https://github.com/DaddyCalcifer/AloneSkylandLauncher";
+        private GitHubReleasesController _releasesController1 = new GitHubReleasesController(url);
 
         private readonly string _launcherPath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
 
@@ -22,10 +20,9 @@ namespace AloneSkylandLauncher.Controller
         {
             try
             {
-                var releases = await _githubClient.Repository.Release.GetAll(GitName, GitRepos);
-                var latestRelease = releases.OrderByDescending(r => r.PublishedAt).FirstOrDefault();
+                var releases = await _releasesController1.GetLastReleaseAsync();
 
-                return latestRelease?.TagName;
+                return releases;
             }
             catch (Exception ex)
             {
@@ -48,19 +45,11 @@ namespace AloneSkylandLauncher.Controller
             string currentVersion = GetCurrentLauncherVersion();
 
             if (latestVersion != currentVersion){
-                var releases = await _githubClient.Repository.Release.GetAll(GitName, GitRepos);
-                var latestRelease = releases.FirstOrDefault(r => r.TagName == latestVersion);
+                var latestRelease = await GetLatestLauncherVersionAsync();
 
                 if (latestRelease == null)
                 {
                     MessageBox.Show("Не удалось найти последнюю версию лаунчера.");
-                    return;
-                }
-
-                var asset = latestRelease.Assets.FirstOrDefault(a => a.Name.EndsWith(".zip"));
-                if (asset == null)
-                {
-                    MessageBox.Show("Последняя версия лаунчера не доступна для скачивания.");
                     return;
                 }
 
@@ -69,7 +58,8 @@ namespace AloneSkylandLauncher.Controller
 
                 using (var webClient = new WebClient())
                 {
-                    await webClient.DownloadFileTaskAsync(new Uri(asset.BrowserDownloadUrl), downloadPath);
+                    var downloadUrl = $"https://github.com/DaddyCalcifer/AloneSkylandLauncher/releases/download/{latestRelease}/launcher.zip";
+                    await _releasesController1.DownloadReleaseAsync(downloadUrl,downloadPath);
                 }
 
                 // Распаковка архива
@@ -83,6 +73,11 @@ namespace AloneSkylandLauncher.Controller
                 string currentLauncherPath = System.Reflection.Assembly.GetExecutingAssembly().Location;
                 string backupLauncherPath = currentLauncherPath + ".bak";
                 string newLauncherPath = Path.Combine(extractPath, "AloneSkylandLauncher.exe");
+
+                if (File.Exists(backupLauncherPath))
+                {
+                    File.Delete(backupLauncherPath);
+                }
 
                 try
                 {

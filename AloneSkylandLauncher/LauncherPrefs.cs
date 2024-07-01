@@ -8,6 +8,6 @@ namespace AloneSkylandLauncher
 {
     public static class LauncherPrefs
     {
-        public readonly static string Version = "v24.07.02";
+        public readonly static string Version = "v24.07.02c";
     }
 }

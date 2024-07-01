@@ -34,17 +34,19 @@ namespace AloneSkylandLauncher
             InitializeComponent();
             this.Width = 700;
             this.Height = 470;
+            this.Title = $"AloneSkyland Launcher {LauncherPrefs.Version}";
             releases = new List<string>();
             versionController = new VersionController(this);
             launcherUpdateController = new LauncherUpdateController();
 
-            //CheckForUpdates();
+            CheckForUpdates();
             loadLabel.Content = String.Empty;
             LoadMarkdownFile();
         }
 
         private async void LoadMarkdownFile()
         {
+            InfoPanel.Markdown = string.Empty;
             string markdownContent = await DownloadMarkdownFileAsync("https://raw.githubusercontent.com/DaddyCalcifer/AloneSkyland/main/README.md");
             InfoPanel.Markdown = markdownContent;
         }

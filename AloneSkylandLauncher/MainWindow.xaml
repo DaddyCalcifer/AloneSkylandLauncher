@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:AloneSkylandLauncher"
         xmlns:md="clr-namespace:Markdig.Wpf;assembly=Markdig.Wpf"
         mc:Ignorable="d"
-        Title="AloneSkyland Launcher v24.07.02" Height="450" Width="700" ResizeMode="CanMinimize" Loaded="Window_Loaded">
+        Title="AloneSkyland Launcher" Height="450" Width="700" ResizeMode="CanMinimize" Loaded="Window_Loaded">
     <Grid>
         <md:MarkdownViewer Margin="0,0,0,166" Name="InfoPanel"/>
         <ProgressBar Name="loadBar" Margin="10,273,10,0" VerticalAlignment="Top" Height="28" RenderTransformOrigin="0.5,0.5">

@@ -8,7 +8,12 @@ using System.Windows.Controls;
 
 public class GitHubReleasesController
 {
-    public static readonly string GitHubReleasesUrl = "https://github.com/DaddyCalcifer/AloneSkyland/releases";
+    public string GitHubReleasesUrl;
+
+    public GitHubReleasesController(string url)
+    {
+        GitHubReleasesUrl = url + "/releases";
+    }
 
     public async Task<List<string>> GetReleasesAsync()
     {
@@ -31,6 +36,21 @@ public class GitHubReleasesController
             }
         }
         return releases;
+    }
+    public async Task<string> GetLastReleaseAsync()
+    {
+        var releases = new List<string>();
+        string version = string.Empty;
+        using (HttpClient client = new HttpClient())
+        {
+            var response = await client.GetStringAsync(GitHubReleasesUrl);
+            var htmlDocument = new HtmlDocument();
+            htmlDocument.LoadHtml(response);
+
+            var versionNode = htmlDocument.DocumentNode.SelectSingleNode("//span[contains(@class, 'ml-1 wb-break-all')]");
+            version = versionNode.InnerText.Trim();
+        }
+        return version;
     }
 
     public async Task DownloadReleaseAsync(string url, string downloadPath, ProgressBar progressBar = null, Label statusLabel = null)
