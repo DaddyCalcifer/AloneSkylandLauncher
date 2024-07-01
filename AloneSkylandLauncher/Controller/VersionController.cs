@@ -26,15 +26,13 @@ namespace AloneSkylandLauncher.Controller
 
         public async Task LoadVersions(ComboBox VersionComboBox)
         {
-            releases.Clear();
+            var versions = await _releasesController.GetReleasesAsync();
             try
             {
-                //releases = await _releasesController.GetReleasesAsync();
                 VersionComboBox.Items.Clear();
-                foreach (var release in releases)
+                foreach (var release in versions)
                 {
-                    VersionComboBox.Items.Add(release.Key);
-                    Console.WriteLine(release.Key);
+                    VersionComboBox.Items.Add(release);
                 }
                 VersionComboBox.SelectedIndex = 0;
             }

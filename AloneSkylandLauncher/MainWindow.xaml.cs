@@ -28,13 +28,13 @@ namespace AloneSkylandLauncher
         LauncherUpdateController launcherUpdateController;
         private readonly HttpClient _httpClient = new HttpClient();
         bool currentVersionInstalled = false;
-        Dictionary<string, string> releases;
+        List<string> releases;
         public MainWindow()
         {
             InitializeComponent();
             this.Width = 700;
             this.Height = 470;
-            releases = new Dictionary<string, string>();
+            releases = new List<string>();
             versionController = new VersionController(this);
             launcherUpdateController = new LauncherUpdateController();
 
@@ -128,9 +128,6 @@ namespace AloneSkylandLauncher
         }
         private void versionBox_SelectionChanged_1(object sender, SelectionChangedEventArgs e)
         {
-            var vers = versionBox.SelectedItem as string;
-            if (releases.ContainsKey(vers))
-                Console.WriteLine($"{releases[vers]}");
             updatePlayPanel();
         }
 
@@ -149,31 +146,7 @@ namespace AloneSkylandLauncher
 
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            //await versionController.LoadVersions(versionBox);
-            await GetReleasesAsync();
-        }
-
-        public async Task GetReleasesAsync()
-        {
-            using (HttpClient client = new HttpClient())
-            {
-                var response = await client.GetStringAsync(GitHubReleasesController.GitHubReleasesUrl);
-                var htmlDocument = new HtmlDocument();
-                htmlDocument.LoadHtml(response);
-
-                var versionNodes = htmlDocument.DocumentNode.SelectNodes("//span[contains(@class, 'ml-1 wb-break-all')]");
-                var count = versionNodes.Count;
-                Console.WriteLine(count);
-                versionBox.Items.Clear();
-                for (var i = 0; i < count; i++)
-                {
-                    var version = versionNodes[i].InnerText.Trim();
-                    releases[version] = $"https://github.com/DaddyCalcifer/AloneSkyland/releases/download/{version}/game.zip";
-                    versionBox.Items.Add(versionNodes[i].InnerText.Trim());
-                }
-                if(versionBox.Items.Count > 0)
-                    versionBox.SelectedIndex = 0;
-            }
+            await versionController.LoadVersions(versionBox);
         }
     }
 }

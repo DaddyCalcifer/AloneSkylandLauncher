@@ -10,9 +10,9 @@ public class GitHubReleasesController
 {
     public static readonly string GitHubReleasesUrl = "https://github.com/DaddyCalcifer/AloneSkyland/releases";
 
-    async Task<Dictionary<string, string>> GetReleasesAsync()
+    public async Task<List<string>> GetReleasesAsync()
     {
-        var releases = new Dictionary<string, string>();
+        var releases = new List<string>();
 
         using (HttpClient client = new HttpClient())
         {
@@ -25,29 +25,11 @@ public class GitHubReleasesController
             Console.WriteLine(count);
             for (var i = 0; i < count; i++)
             {
-                Console.WriteLine($"{versionNodes[i].InnerText.Trim()}");
-            }
-            if (versionNodes != null)
-            {
-                foreach (var versionNode in versionNodes)
-                {
-                    var version = versionNode.InnerText.Trim();
-                    var tagUrl = $"https://github.com/DaddyCalcifer/AloneSkyland/releases/tag/{version}";
-
-                    var tagResponse = await client.GetStringAsync(tagUrl);
-                    var tagDocument = new HtmlDocument();
-                    tagDocument.LoadHtml(tagResponse);
-
-                    var assetNode = tagDocument.DocumentNode.SelectSingleNode("//a[contains(@href, '.zip')]");
-                    if (assetNode != null)
-                    {
-                        var downloadUrl = "https://github.com" + assetNode.GetAttributeValue("href", "").Trim();
-                        releases[version] = downloadUrl;
-                    }
-                }
+                var versionn = versionNodes[i].InnerText.Trim();
+                Console.WriteLine($"{versionn}");
+                releases.Add(versionn);
             }
         }
-
         return releases;
     }
 
@@ -68,18 +50,6 @@ public class GitHubReleasesController
                     double totalMB = e.TotalBytesToReceive / 1024.0 / 1024.0;
                     double speedKBps = e.BytesReceived / 1024.0 / 1024.0 / (e.ProgressPercentage / 100.0);
                     statusLabel.Content = $"{downloadedMB:F2} MB / {totalMB:F2} MB ({speedKBps:F2} MB/s)";
-                }
-            };
-
-            webClient.DownloadFileCompleted += (s, e) =>
-            {
-                if (e.Error != null)
-                {
-                    System.Windows.MessageBox.Show($"Error downloading file: {e.Error.Message}");
-                }
-                else
-                {
-                    System.Windows.MessageBox.Show("Download completed.");
                 }
             };
 
