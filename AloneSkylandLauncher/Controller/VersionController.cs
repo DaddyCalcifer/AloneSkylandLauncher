@@ -59,6 +59,8 @@ namespace AloneSkylandLauncher.Controller
                 var downloadUrl = $"https://github.com/DaddyCalcifer/AloneSkyland/releases/download/{version}/game.zip";
 
                 string downloadPath = Path.Combine(_appDataPath, $"{version.Replace(".", "")}.zip");
+                progressBar.Visibility = Visibility.Visible;
+                statusLabel.Visibility = Visibility.Visible;
 
                 await _releasesController.DownloadReleaseAsync(downloadUrl, downloadPath, progressBar, statusLabel);
 
@@ -81,6 +83,8 @@ namespace AloneSkylandLauncher.Controller
                 }
                 statusLabel.Content = "Загрузка завершена.";
                 MessageBox.Show("Загрузка завершена.");
+                progressBar.Visibility = Visibility.Hidden;
+                statusLabel.Visibility = Visibility.Hidden;
             }
             catch (Exception ex)
             {
@@ -91,7 +95,7 @@ namespace AloneSkylandLauncher.Controller
             }
         }
 
-        public void LaunchGame(string version, string args = "")
+        public void LaunchGame(string version,string profile, string args = "")
         {
             string versionPath = Path.Combine(_appDataPath, version.Replace(".", ""));
             string gameExecutable = Path.Combine(versionPath, "game\\Alone Skyland.exe");
@@ -99,7 +103,7 @@ namespace AloneSkylandLauncher.Controller
             var startInfo = new ProcessStartInfo(gameExecutable)
             {
                 UseShellExecute = true,
-                WorkingDirectory = versionPath,
+                WorkingDirectory = ProfileManager.dataPath+profile,
                 Arguments = args,
                 // Verb = "runas"  // Запуск от имени администратора
             };

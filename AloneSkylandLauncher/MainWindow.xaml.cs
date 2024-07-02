@@ -16,6 +16,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using MaterialDesignThemes.Wpf;
+using AloneSkylandLauncher.Model;
 
 namespace AloneSkylandLauncher
 {
@@ -26,18 +28,23 @@ namespace AloneSkylandLauncher
     {
         VersionController versionController;
         LauncherUpdateController launcherUpdateController;
+        ProfileManager profileManager;
         private readonly HttpClient _httpClient = new HttpClient();
         bool currentVersionInstalled = false;
         List<string> releases;
         public MainWindow()
         {
             InitializeComponent();
-            this.Width = 700;
-            this.Height = 470;
+            //this.Height = 470;
+            //this.Width = 700;
             this.Title = $"AloneSkyland Launcher {LauncherPrefs.Version}";
             releases = new List<string>();
             versionController = new VersionController(this);
             launcherUpdateController = new LauncherUpdateController();
+            profileManager = new ProfileManager(profileBox);
+
+            loadBar.Visibility = Visibility.Hidden; 
+            loadBar.Visibility = Visibility.Hidden;
 
             CheckForUpdates();
             loadLabel.Content = String.Empty;
@@ -112,6 +119,7 @@ namespace AloneSkylandLauncher
         public void updatePlayPanel()
         {
             string selectedVersion = versionBox.SelectedItem as string;
+            string selectedProfile = profileBox.SelectedItem as string;
             if (!string.IsNullOrEmpty(selectedVersion))
             {
                 currentVersionInstalled = versionController.isVersionInstalled(selectedVersion);
@@ -120,12 +128,16 @@ namespace AloneSkylandLauncher
             if (currentVersionInstalled)
             {
                 PlayButton.IsEnabled = true;
+                profileBox.IsEnabled = true;
                 downloadButton.Content = "Удалить";
+                downloadButton.Background = System.Windows.Media.Brushes.Red;
             }
             else
             {
                 PlayButton.IsEnabled = false;
+                profileBox.IsEnabled = false;
                 downloadButton.Content = "Загрузить";
+                downloadButton.Background = System.Windows.Media.Brushes.Green;
             }
         }
         private void versionBox_SelectionChanged_1(object sender, SelectionChangedEventArgs e)
@@ -136,11 +148,12 @@ namespace AloneSkylandLauncher
         private void PlayButton_Click(object sender, RoutedEventArgs e)
         {
             string selectedVersion = versionBox.SelectedItem as string;
-            if (!string.IsNullOrEmpty(selectedVersion))
+            string selectedProfile = profileBox.SelectedItem as string;
+            if (!string.IsNullOrEmpty(selectedVersion) || !string.IsNullOrEmpty(selectedProfile))
             {
-                versionController.LaunchGame(selectedVersion);
+                versionController.LaunchGame(selectedVersion,selectedProfile);
             }
-            else MessageBox.Show("Ошибка при запуске игры: Не выбрана версия",
+            else MessageBox.Show("Ошибка при запуске игры: Не выбрана версия или игровой профиль",
                     "Ошибка запуска",
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
@@ -149,6 +162,95 @@ namespace AloneSkylandLauncher
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
             await versionController.LoadVersions(versionBox);
+            loadLData();
+        }
+        void loadLData()
+        {
+            var ldata = LauncherData.Load("launcher.config");
+            if (ldata != null)
+            {
+                profileBox.Items.Clear();
+                versionBox.SelectedItem = ldata.lastVersion;
+                ProfileManager.profiles = ldata.profiles;
+                profileManager.initProfiles();
+                foreach (var profile in ldata.profiles)
+                {
+                    profileBox.Items.Add(profile);
+                }
+                updateProfilesUI();
+                profileBox.SelectedItem = ldata.lastProfile;
+            }
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            saveLData();
+        }
+        void saveLData()
+        {
+            string selectedVersion = versionBox.SelectedItem as string;
+            string selectedProfile = profileBox.SelectedItem as string;
+            LauncherData launcherData = new LauncherData();
+            launcherData.lastVersion = selectedVersion;
+            launcherData.lastProfile = selectedProfile;
+            launcherData.profiles = ProfileManager.profiles;
+            launcherData.Save("launcher.config");
+        }
+
+        void updateProfilesUI()
+        {
+            ProfileListBox.Items.Clear();
+            foreach(var profile in ProfileManager.profiles)
+            {
+                ProfileListBox.Items.Add(profile);
+            }
+        }
+        void updateStatsUI(WorldData data)
+        {
+            if (data == null)
+            {
+                statsPanel.Visibility = Visibility.Hidden;
+                return;
+            }
+            statsPanel.Visibility = Visibility.Visible;
+            statsVersion.Content = $"Версия игры: {data.version}";
+            HealthProgressBar.Maximum = data.maxHP;
+            HealthProgressBar.Value = data.hp;
+            HungerProgressBar.Maximum = data.maxHunger;
+            HungerProgressBar.Value = data.hunger;
+            ThirstProgressBar.Maximum = data.maxThist;
+            ThirstProgressBar.Value = data.thist;
+            if (data.Lvl != 0)
+            {
+                CraftingLevelLabel.Content = $"Уровень:  {data.Lvl}\tОпыт: {Math.Round(data.exp)}";
+                LearningPointsLabel.Content = $"Очки изучения: {data.learnPTS}";
+            }
+        }
+
+        private void AddProfileButton_Click(object sender, RoutedEventArgs e)
+        {
+            var profileName = NewProfileTextBox.Text.Trim();
+            if (profileName == null) return;
+            profileManager.addProfile(profileName);
+            updateProfilesUI();
+            NewProfileTextBox.Text = string.Empty;
+            ProfileListBox.SelectedItem = profileName;
+            saveLData();
+        }
+
+        private void DeleteProfileButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (ProfileListBox.SelectedItem == null) return;
+            profileManager.deleteProfile(ProfileListBox.SelectedItem as string);
+            updateProfilesUI();
+            statsPanel.Visibility = Visibility.Hidden;
+            saveLData();
+        }
+
+        private void ProfileListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var data = WorldData.Load(ProfileManager.dataPath + ProfileListBox.SelectedItem as string + "\\save.asl");
+            updateStatsUI(data);
         }
     }
 }
