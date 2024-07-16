@@ -16,7 +16,6 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using MaterialDesignThemes.Wpf;
 using AloneSkylandLauncher.Model;
 
 namespace AloneSkylandLauncher
@@ -48,14 +47,19 @@ namespace AloneSkylandLauncher
 
             CheckForUpdates();
             loadLabel.Content = String.Empty;
-            LoadMarkdownFile();
+            LoadHTMLFile();
         }
 
         private async void LoadMarkdownFile()
         {
-            InfoPanel.Markdown = string.Empty;
+            //InfoPanel.Markdown = string.Empty;
             string markdownContent = await DownloadMarkdownFileAsync("https://raw.githubusercontent.com/DaddyCalcifer/AloneSkyland/main/README.md");
-            InfoPanel.Markdown = markdownContent;
+            //InfoPanel.Markdown = markdownContent;
+        }
+        private async void LoadHTMLFile()
+        {
+            string htmlContent = await DownloadMarkdownFileAsync("https://raw.githubusercontent.com/DaddyCalcifer/AloneSkyland/main/info.html");
+            InfoPanel.NavigateToString(htmlContent);
         }
 
         private async Task<string> DownloadMarkdownFileAsync(string url)

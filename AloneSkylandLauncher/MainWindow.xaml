@@ -11,7 +11,7 @@
         <TabControl>
             <TabItem Header="Главная">
                 <Grid>
-                    <md:MarkdownViewer Margin="0,0,0,128" Name="InfoPanel"/>
+                    <WebBrowser Margin="0,0,0,128" x:Name="InfoPanel"/>
                     <ProgressBar Name="loadBar" Margin="10,273,10,0" VerticalAlignment="Top" Height="28" RenderTransformOrigin="0.5,0.5">
                         <ProgressBar.RenderTransform>
                             <TransformGroup>
@@ -66,7 +66,6 @@
                     </StackPanel>
                 </Grid>
             </TabItem>
-
         </TabControl>
     </Grid>
 </Window>
